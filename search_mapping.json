@@ -1,0 +1,92 @@
+[
+  {
+    "url": "https://felt.com/blog/7-free-map-apis-compared-to-google-maps",
+    "name": "7 free map APIs compared to Google Maps - Felt",
+    "snippet": "Discover the best free map APIs for developers and learn how they compare to Google Maps API to improve your app development projects.",
+    "host_name": "felt.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://radar.com/blog/mapbox-vs-google-maps-api",
+    "name": "Mapbox vs. Google Maps API: 2026 comparison (and better options)",
+    "snippet": "Both Mapbox and Google Maps API offer powerful features, but Radar provides the best overall value proposition for businesses prioritizing location services.",
+    "host_name": "radar.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://brocoders.com/blog/mapbox-vs-google-maps-vs-openstreetmap",
+    "name": "Google Maps vs Mapbox vs OpenStreetMap: Why most API",
+    "snippet": "Every developer compares mapping APIs the same way: Find the cheapest vendor and you control your mapping costs. It makes intuitive sense.",
+    "host_name": "brocoders.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.reddit.com/r/opensource/comments/1in23tb/free_open_source_google_maps_alternatives",
+    "name": "Free & Open Source Google Maps Alternatives : r/opensource - Reddit",
+    "snippet": "Here are some Free & Open Source options: App - osmand.net - organicmaps.app Web - facilmap.org - mapcarta.com - openstreetmap.org",
+    "host_name": "www.reddit.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://local-eyes.nl/best-mapping-apis-for-developers",
+    "name": "Best Mapping APIs for Developers (2026 Comparison) - Local Eyes",
+    "snippet": "Compare the best mapping APIs for developers in 2026. Explore Google Maps, HERE, Mapbox, and TomTom pricing, features, and use cases.",
+    "host_name": "local-eyes.nl",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.wpgmaps.com/7-google-maps-api-alternatives-for-2026",
+    "name": "7 Google Maps API Alternatives for 2026",
+    "snippet": "Explore the best Google Maps API alternatives for 2026 with free and paid options that don't require a credit card and in some cases, ...",
+    "host_name": "www.wpgmaps.com",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://community.weweb.io/t/alternative-to-google-maps-api-mapbox-others/5606",
+    "name": "Alternative to Google Maps API - Mapbox, others? - Developer corner",
+    "snippet": "WeWeb has a native Maps component but appears to only work with the Google Maps API. What would it take to get a Mapbox or other alternative added?",
+    "host_name": "community.weweb.io",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://api7.ai/learning-center/api-101/mapping-and-geolocation-apis",
+    "name": "Mapping and Geolocation APIs: Google Maps and Alternatives",
+    "snippet": "Mapbox provides deep customization and developer-friendly tools. OpenStreetMap (OSM) offers ultimate freedom and open data, but requires more ...\nBuild scalable mapping apps by abstracting APIs with a gateway for security, cost control, and vendor flexibility.",
+    "host_name": "api7.ai",
+    "rank": 7,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://mapatlas.eu/blog/google-maps-api-alternatives-eu-developers",
+    "name": "Google Maps API Alternatives for EU Developers (2026) - MapAtlas",
+    "snippet": "The Main Alternatives · 1. OpenStreetMap + Leaflet.js · 2. MapLibre GL JS + Commercial Tiles · 3. Maptiler · 4. MapAtlas.\nGoogle Maps API costs are rising and GDPR compliance is complicated. Here are the best alternatives for EU developers, compared on pricing, ...",
+    "host_name": "mapatlas.eu",
+    "rank": 8,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.mapbox.com",
+    "name": "Mapbox | Maps, Navigation, Search, and Data",
+    "snippet": "APIs and SDKs for AI-powered maps, location search, turn-by-turn navigation, and geospatial data in mobile or web apps. Get started for free.",
+    "host_name": "www.mapbox.com",
+    "rank": 9,
+    "date": "",
+    "favicon": ""
+  }
+]

@@ -1,0 +1,92 @@
+[
+  {
+    "url": "https://sanborn.com/blog/google-maps-and-here-which-apis-should-you-choose",
+    "name": "Google Maps vs. HERE Maps: Which APIs Should You Choose?",
+    "snippet": "Google Maps Platform APIs vs. HERE APIs – Pricing Comparison. Google Maps APIs are priced on a ”pay-per-use” basis, based on the number of “requests” made ...",
+    "host_name": "sanborn.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://radar.com/blog/mapbox-vs-google-maps-api",
+    "name": "Mapbox vs. Google Maps API: 2026 comparison (and better options)",
+    "snippet": "Mapbox offers a pay-as-you-go pricing model with a generous free tier, making it flexible and potentially cost-effective, especially for smaller ...",
+    "host_name": "radar.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://brocoders.com/blog/mapbox-vs-google-maps-vs-openstreetmap",
+    "name": "Google Maps vs Mapbox vs OpenStreetMap: Why most API",
+    "snippet": "Mapbox Search Box charges $0.005 per keystroke. For an app where a single user search = 1 Google session but 50 Mapbox keystrokes, the cost ...",
+    "host_name": "brocoders.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.reddit.com/r/MapAtlas_Official/comments/1pi4nh2/whats_the_cheapest_google_maps_api_alternative_in",
+    "name": "What's the cheapest Google Maps API alternative in 2025? We",
+    "snippet": "What's the cheapest Google Maps API alternative in 2025? We compared the pricing · Google Maps: $630 (10K free + 90K × $7) · Mapbox: $250 (50K ...",
+    "host_name": "www.reddit.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.mapbox.com/pricing",
+    "name": "Mapbox pricing",
+    "snippet": "Start building today with self-serve APIs and SDKs. Use our pricing calculators to preview free tiers and usage-based pricing for each Mapbox product.",
+    "host_name": "www.mapbox.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://local-eyes.nl/best-mapping-apis-for-developers",
+    "name": "Best Mapping APIs for Developers (2026 Comparison) - Local Eyes",
+    "snippet": "Compare the best mapping APIs for developers in 2026. Explore Google Maps, HERE, Mapbox, and TomTom pricing, features, and use cases.",
+    "host_name": "local-eyes.nl",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://scrap.io/google-maps-api-pricing-calculator-alternatives-2025",
+    "name": "Google Maps API Pricing Calculator 2026: Complete Cost Guide",
+    "snippet": "Mapbox offers 50,000 free map loads/month vs Google's roughly 28,500 (BuildMVPFast, 2026). After the free tier, pricing starts at $5/1,000 loads — still cheaper ...",
+    "host_name": "scrap.io",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://discussions.unity.com/t/google-maps-api-pricing-how-it-works/804090",
+    "name": "Google Maps API - Pricing (How it works)? - Unity Discussions",
+    "snippet": "Learn about the flexible Google Maps Platform costs and API pricing built to fit your business goals and needs, while staying within budget.",
+    "host_name": "discussions.unity.com",
+    "rank": 7,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://felt.com/blog/7-free-map-apis-compared-to-google-maps",
+    "name": "7 free map APIs compared to Google Maps - Felt",
+    "snippet": "Discover the best free map APIs for developers and learn how they compare to Google Maps API to improve your app development projects.",
+    "host_name": "felt.com",
+    "rank": 8,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.maptiler.com/news/2018/05/google-maps-api-alternative",
+    "name": "Google Maps API alternative | MapTiler",
+    "snippet": "Switching from Google Maps API is very simple: just delete the Google Maps code and replace it with a pre-generated code you get in MapTiler Cloud.",
+    "host_name": "www.maptiler.com",
+    "rank": 9,
+    "date": "",
+    "favicon": ""
+  }
+]

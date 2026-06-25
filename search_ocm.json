@@ -1,0 +1,92 @@
+[
+  {
+    "url": "https://openchargemap.org",
+    "name": "Open Charge Map - The global public registry of electric vehicle",
+    "snippet": "Open Charge Map is the global database of EV charging stations, managed and populated by EV drivers from all over the world.",
+    "host_name": "openchargemap.org",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://openchargemap.org/site",
+    "name": "Login - Open Charge Map",
+    "snippet": "Open Charge Map is a non-commercial, non-profit service hosted and supported by a community of businesses, charities, developers and interested parties around ...",
+    "host_name": "openchargemap.org",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://github.com/openchargemap/ocm-system",
+    "name": "openchargemap/ocm-system: Open Charge Map is the  - GitHub",
+    "snippet": "Open Charge Map is the global public registry of electric vehicle charging locations. OCM was first established in 2011 and aims to crowdsource a high quality, ...",
+    "host_name": "github.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://map.openchargemap.io",
+    "name": "Open Charge Map - Electric Vehicle Charging Locations Near You",
+    "snippet": "Open Charge Map is the world's largest Open Data registry for Electric Vehicle Charging Locations. Browse locations, Add Comments, Photos or Add new ...",
+    "host_name": "map.openchargemap.io",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.reddit.com/r/evcharging/comments/1pfne59/built_a_free_tool_to_find_chargers_faster_using",
+    "name": "Built a free, tool to find chargers faster (using Open Charge Map data)",
+    "snippet": "It pulls data directly from Open Charge Map (OCM) and automatically adapts to your specific vehicule. There is no backend, no user account ...",
+    "host_name": "www.reddit.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://community.openchargemap.org/t/api-access-for-ev-charging-stations-data/1254",
+    "name": "API Access for EV Charging Stations Data",
+    "snippet": "The objective is to obtain comprehensive data about each charging station, including the number and type of sockets, the power of each socket, usage times, etc ...",
+    "host_name": "community.openchargemap.org",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://dlthub.com/context/source/open-charge-map",
+    "name": "Open Charge Map Python API Docs | dltHub",
+    "snippet": "The Open Charge Map API provides access to global charging station data. The base URL is https://api.openchargemap.io/v3.",
+    "host_name": "dlthub.com",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.openassistantgpt.io/integrations/api-integrations/transportation/open-charge-map",
+    "name": "Integrate Open Charge Map API - OpenAssistantGPT",
+    "snippet": "Open Charge Map provides a comprehensive database of electric vehicle charging stations worldwide. The service offers detailed information about charging ...",
+    "host_name": "www.openassistantgpt.io",
+    "rank": 7,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://tech.marksblogg.com/open-charge-map-global-ev-charging-point-dataset.html",
+    "name": "Global EV Charging Points with Open Charge Map - Mark Litwintschik",
+    "snippet": "Open Charge Map (OCM) aims to document the world's Electric Vehicle (EV) Charging Points. To date, they have produced a dataset of over 200K+ charging point ...",
+    "host_name": "tech.marksblogg.com",
+    "rank": 8,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://wiki.openstreetmap.org/wiki/OpenChargeMap",
+    "name": "OpenChargeMap - OpenStreetMap Wiki",
+    "snippet": "Open Charge Map (openchargemap.org and commonly abbreviated to OCM) is a map and 'open data' registry of electric vehicle charging locations.",
+    "host_name": "wiki.openstreetmap.org",
+    "rank": 9,
+    "date": "",
+    "favicon": ""
+  }
+]

@@ -1,0 +1,92 @@
+[
+  {
+    "url": "https://afdc.energy.gov/stations",
+    "name": "Alternative Fueling Station Locator",
+    "snippet": "Alternative Fueling Station Locator. Find alternative fueling stations in the United States and Canada. By default, this tool displays only available, ...",
+    "host_name": "afdc.energy.gov",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developer.nlr.gov/docs/transportation/alt-fuel-stations-v1",
+    "name": "Alternative Fuel Stations API | NLR: Developer Network",
+    "snippet": "Query our database of alternative fuel stations. This dataset powers the Alternative Fueling Station Locator on the Alternative Fuels Data Center. This ...",
+    "host_name": "developer.nlr.gov",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.arcgis.com/home/item.html?id=9010c04bcdf84c36abb74e98778af579",
+    "name": "Alternative Fueling Stations - Overview - ArcGIS Online",
+    "snippet": "The Alternative Fueling Station dataset helps fleet managers and drivers of alternative fuel vehicles find stations that offer biodiesel (B20 and above), ...",
+    "host_name": "www.arcgis.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://afdc.energy.gov",
+    "name": "Alternative Fuels Data Center - Department of Energy",
+    "snippet": "The go-to resource for advanced transportation fuels and technologies · Station Locator · Information by State · Tool Finder · Fuels and Vehicles · Latest Features ...\nThe Alternative Fuels Data Center (AFDC) provides information, data, and tools to help fleets, fuel providers, policymakers, cities, states, Clean Cities and ...",
+    "host_name": "afdc.energy.gov",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://ui.adsabs.harvard.edu/abs/2025harv.data..151E/abstract",
+    "name": "Extracted Data From: Alternative Fuels Data Center - ADS",
+    "snippet": "Both the total number of station locations and EVSE ports appear in the EV charging search results on the \"Advanced Filters\" tab. The Station Locator imports ...\nUsers may search by charger types, connectors, and networks using the Fuel button on the \"Advanced Filters\" tab. NREL is in the process of transitioning EV ...",
+    "host_name": "ui.adsabs.harvard.edu",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.osti.gov/biblio/2478445",
+    "name": "Electric Vehicle Charging Infrastructure Trends from the Alternative",
+    "snippet": "Using data from the U.S. Department of Energy's (DOE's) Alternative Fueling Station Locator, this report provides a snapshot of the state of EV ...",
+    "host_name": "www.osti.gov",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://ctrf.ca/wp-content/uploads/2022/08/2019152Levene.pdf",
+    "name": "[PDF] developing a comprehensive database of alternative fuel station",
+    "snippet": "In 1991, the National Renewable Energy Laboratory (NREL) began collecting data for the United States. Department of Energy (USDOE)Alternative Fuels Data Center ...",
+    "host_name": "ctrf.ca",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://chargeatwork.org/wp-content/uploads/2025/08/electric_vehicle_charging_infrastructure_trends_second_quarter_2024.pdf",
+    "name": "[PDF] Electric Vehicle Charging Infrastructure Trends from the Alternative",
+    "snippet": "Using data from the U.S. Department of Energy's (DOE's) Alternative Fueling Station. Locator (AFDC 2024b), this report provides a snapshot of the state of EV ...",
+    "host_name": "chargeatwork.org",
+    "rank": 7,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://driveelectric.gov/stations",
+    "name": "Electric Vehicle Charging Stations",
+    "snippet": "The Alternative Fueling Station Locator from the U.S. Department of Energy's Alternative Fuels Data Center shows electric vehicle charging stations in the ...",
+    "host_name": "driveelectric.gov",
+    "rank": 8,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.kaggle.com/datasets/saketpradhan/electric-and-alternative-fuel-charging-stations",
+    "name": "Electric & Alternative Fuel Charging Stations 2023 - Kaggle",
+    "snippet": "The data in the Alternative Fueling Station Locator are gathered and verified through a variety of methods.\nNREL is in the process of transitioning EV charging station counting logic to align with the hierarchy defined in the Open Charge Point Interface (OCPI) ...\nThe data in the Alternative Fueling Station Locator are gathered and verified through a variety of methods. The National Renewable Energy Laboratory (NREL) ...",
+    "host_name": "www.kaggle.com",
+    "rank": 9,
+    "date": "",
+    "favicon": ""
+  }
+]

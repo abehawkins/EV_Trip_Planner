@@ -1,0 +1,92 @@
+[
+  {
+    "url": "https://afdc.energy.gov/data/10972",
+    "name": "Maps and Data - U.S. Public Electric Vehicle Charging Infrastructure",
+    "snippet": "This chart shows the growth of US public electric vehicle (EV) charging infrastructure since 2007. The number of EV charging ports has grown consistently.",
+    "host_name": "afdc.energy.gov",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://data.europa.eu/data/datasets/https-data-gov-lt-datasets-1854-?locale=en",
+    "name": "Electric vehicle charging stations - EU Open Data Portal",
+    "snippet": "Information on the location, operation and occupancy of charging stations for electric vehicles built near state and local roads, types of connections ...",
+    "host_name": "data.europa.eu",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://github.com/IntelligentSystemsLab/ST-EVCDP",
+    "name": "GitHub - IntelligentSystemsLab/ST-EVCDP: A real-world dataset for",
+    "snippet": "This project is dedicated to offering high-quality, real-world, open datasets for researching spatio-temporal electric vehicle (EV) charging demand in urban ...",
+    "host_name": "github.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://link.springer.com/article/10.1186/s42162-025-00615-4",
+    "name": "EV-Insights: open source framework for electric vehicle charging",
+    "snippet": "Analysis module is capable to visualize data and compare different datasets. It enables users to gain insights into charging patterns, user ...",
+    "host_name": "link.springer.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.iea.org/reports/global-ev-outlook-2025/electric-vehicle-charging",
+    "name": "Electric vehicle charging – Global EV Outlook 2025 – Analysis - IEA",
+    "snippet": "In 2024, more than 1.3 million public charging points were added to the global stock, representing an increase of more than 30% compared to the previous year.",
+    "host_name": "www.iea.org",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://data.cnra.ca.gov/dataset/?_organization_limit=0&q=+vertical-location--sea-floor&res_format=HTML&groups=energy",
+    "name": "Dataset - California Natural Resources Agency Open Data",
+    "snippet": "This layer features the locations of EV charging stations awarded through Round 1 of California's NEVI funding program that are planned for deployment. MAP ...",
+    "host_name": "data.cnra.ca.gov",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.nature.com/articles/s41597-025-05584-7",
+    "name": "A City-scale and Harmonized Dataset for Global Electric Vehicle",
+    "snippet": "Raw data covers public EV charging chargers across the entirety of each city's urban area, collected from open online platforms for ...",
+    "host_name": "www.nature.com",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.evconnect.com/blog/2025-ev-charging-industry-report",
+    "name": "Latest EV Charging Report Highlights Industry Growth in 2025",
+    "snippet": "A new industry report with full-year 2025 data highlights impressive growth for the U.S. EV charging industry including DC fast charging (DCFC).",
+    "host_name": "www.evconnect.com",
+    "rank": 7,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://driveelectric.gov/software-interoperability",
+    "name": "Electric Vehicle Charging Data and Communications Protocol",
+    "snippet": "For electric vehicles (EVs), the Joint Office convenes and guides both open-source and common framework communications protocol and data-sharing approaches.",
+    "host_name": "driveelectric.gov",
+    "rank": 8,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://theicct.org/publication/us-charging-infrastructure-deployment-through-2024-apr25",
+    "name": "U.S. charging infrastructure deployment through 2024",
+    "snippet": "From 2019 to 2024, the deployment rate of this non-home charging infrastructure for light-duty electric vehicles (EVs) grew about 25% annually.",
+    "host_name": "theicct.org",
+    "rank": 9,
+    "date": "",
+    "favicon": ""
+  }
+]
