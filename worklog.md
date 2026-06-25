@@ -46,3 +46,24 @@ Stage Summary:
 - Created: src/components/ev/ev-map-client.tsx (dynamic import wrapper)
 - Modified: src/app/page.tsx, src/components/ev/ev-map.tsx, src/components/ev/sidebar-content.tsx, src/app/layout.tsx
 - Both /api/chargers and /api/poi endpoints verified working with sample data fallback
+
+---
+Task ID: 2
+Agent: main
+Task: Fix zoom-out bug, search bar click, add trip planning
+
+Work Log:
+- Fixed zoom-out snap-back: root cause was moveend → setMapCenter → flyTo(Math.max(zoom,10)) feedback loop. Replaced with flyToTrigger counter pattern — moveend only syncs store for USER moves (skips our own flyTo via lastFlyToCenter ref check). Search/geolocate/trip now call triggerFlyTo() which increments a counter watched by a separate effect.
+- Fixed search bar: added pointer-events-auto to the search wrapper div (parent header has pointer-events-none)
+- Added trip planning: TripPoint type in store, tripMode/Origin/Destination state, flyToTrigger/flyToZoom for safe navigation
+- Created TripPlanner component: origin/destination SearchBar (green/red dot indicators), swap button, direct distance calc, estimated charge stops, "Find Chargers Along Route" that generates intermediate points along the straight-line route and batch-fetches chargers
+- Updated SearchBar to support modes: single (default), origin, destination with different icons and callbacks
+- Updated ev-map.tsx: added trip route line (dashed blue), origin (green dot), destination (red dot) as GeoJSON layers
+- Updated page.tsx: "Plan Trip" button in header, trip planner panel in sidebar, updated legend for trip markers
+- Updated geolocate to use triggerFlyTo instead of direct setMapCenter
+
+Stage Summary:
+- 3 bugs fixed: zoom feedback loop, search bar click, trip feature missing
+- New files: src/components/ev/trip-planner.tsx
+- Modified: ev-store.ts, ev-map.tsx, search-bar.tsx, page.tsx
+- All lint clean, build passes

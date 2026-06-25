@@ -43,12 +43,24 @@ export interface POI {
   openingHours: string;
 }
 
+export interface TripPoint {
+  name: string;
+  lat: number;
+  lng: number;
+}
+
 interface EVStore {
   // Map state
   mapCenter: [number, number];
   mapZoom: number;
   setMapCenter: (center: [number, number]) => void;
   setMapZoom: (zoom: number) => void;
+
+  // Fly-to trigger: increment to tell the map to fly to mapCenter
+  // This avoids the feedback loop where moveend -> setMapCenter -> flyTo
+  flyToTrigger: number;
+  flyToZoom: number;
+  triggerFlyTo: (zoom: number) => void;
 
   // Vehicle / range
   rangeMiles: number;
@@ -87,6 +99,14 @@ interface EVStore {
   // Sidebar
   sidebarOpen: boolean;
   setSidebarOpen: (o: boolean) => void;
+
+  // Trip planning
+  tripMode: boolean;
+  setTripMode: (v: boolean) => void;
+  tripOrigin: TripPoint | null;
+  setTripOrigin: (p: TripPoint | null) => void;
+  tripDestination: TripPoint | null;
+  setTripDestination: (p: TripPoint | null) => void;
 }
 
 export const useEVStore = create<EVStore>((set) => ({
@@ -95,6 +115,11 @@ export const useEVStore = create<EVStore>((set) => ({
   mapZoom: 4,
   setMapCenter: (center) => set({ mapCenter: center }),
   setMapZoom: (zoom) => set({ mapZoom: zoom }),
+
+  // Fly-to trigger
+  flyToTrigger: 0,
+  flyToZoom: 4,
+  triggerFlyTo: (zoom) => set((s) => ({ flyToTrigger: s.flyToTrigger + 1, flyToZoom: zoom })),
 
   // Vehicle range (miles)
   rangeMiles: 200,
@@ -133,4 +158,12 @@ export const useEVStore = create<EVStore>((set) => ({
   // Sidebar
   sidebarOpen: true,
   setSidebarOpen: (o) => set({ sidebarOpen: o }),
+
+  // Trip planning
+  tripMode: false,
+  setTripMode: (v) => set({ tripMode: v }),
+  tripOrigin: null,
+  setTripOrigin: (p) => set({ tripOrigin: p }),
+  tripDestination: null,
+  setTripDestination: (p) => set({ tripDestination: p }),
 }));

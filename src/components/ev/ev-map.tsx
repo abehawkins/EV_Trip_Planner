@@ -10,18 +10,21 @@ export default function EVMap() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
-  const rangeCircleRef = useRef<maplibregl.Popup | null>(null);
 
   const {
     mapCenter, mapZoom, setMapCenter, setMapZoom,
     rangeMiles, showRange,
     chargers, selectedCharger, setSelectedCharger,
     pois, showPOIs, dogFriendlyOnly,
+    flyToTrigger, flyToZoom,
+    tripOrigin, tripDestination,
   } = useEVStore();
 
   const [mapReady, setMapReady] = useState(false);
+  // Track the center we last flew to — ignore moveend if it matches
+  const lastFlyToCenter = useRef<string>('');
 
-  // Initialize map — read initial center/zoom from store directly to avoid stale closure
+  // Initialize map
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return;
 
@@ -59,9 +62,14 @@ export default function EVMap() {
     map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
 
     map.on('moveend', () => {
-      const center = map.getCenter();
-      setMapCenter([center.lng, center.lat]);
-      setMapZoom(map.getZoom());
+      const c = map.getCenter();
+      const key = `${c.lng.toFixed(4)},${c.lat.toFixed(4)}`;
+      // Only sync to store if this was a USER move, not our own flyTo
+      if (key !== lastFlyToCenter.current) {
+        setMapCenter([c.lng, c.lat]);
+        setMapZoom(map.getZoom());
+      }
+      lastFlyToCenter.current = '';
     });
 
     map.on('load', () => {
@@ -76,13 +84,14 @@ export default function EVMap() {
     };
     }, []);
 
-  // Sync map center/zoom from external changes (e.g. search result)
+  // Fly to target — only triggered by flyToTrigger (search, geolocate, trip)
   useEffect(() => {
-    if (mapRef.current) {
-      mapRef.current.flyTo({ center: mapCenter, zoom: Math.max(mapZoom, 10), duration: 1500 });
-    }
-  // Only run when mapCenter identity changes (search result)
-  }, [mapCenter[0], mapCenter[1]]);
+    if (!mapRef.current || flyToTrigger === 0) return;
+    const center = useEVStore.getState().mapCenter;
+    const cKey = `${center[0].toFixed(4)},${center[1].toFixed(4)}`;
+    lastFlyToCenter.current = cKey;
+    mapRef.current.flyTo({ center, zoom: flyToZoom, duration: 1500 });
+  }, [flyToTrigger]);
 
   // Clear all markers
   const clearMarkers = useCallback(() => {
@@ -130,7 +139,6 @@ export default function EVMap() {
         useEVStore.getState().setSidebarOpen(true);
       });
 
-      // Hover tooltip
       marker.setPopup(
         new maplibregl.Popup({ offset: 20, closeButton: false, className: 'ev-popup' })
           .setHTML(
@@ -207,11 +215,9 @@ export default function EVMap() {
 
     if (showRange && rangeMiles > 0) {
       const center = map.getCenter();
-      const radiusMiles = rangeMiles;
-      const radiusDegLat = radiusMiles / 69;
-      const radiusDegLng = radiusMiles / (69 * Math.cos((center.lat * Math.PI) / 180));
+      const radiusDegLat = rangeMiles / 69;
+      const radiusDegLng = rangeMiles / (69 * Math.cos((center.lat * Math.PI) / 180));
 
-      // Generate circle points
       const circlePoints: [number, number][] = [];
       for (let i = 0; i <= 64; i++) {
         const angle = (i * 2 * Math.PI) / 64;
@@ -220,20 +226,15 @@ export default function EVMap() {
           center.lat + radiusDegLat * Math.sin(angle),
         ]);
       }
-      circlePoints.push(circlePoints[0]); // close the ring
-
-      const geojson = {
-        type: 'Feature' as const,
-        properties: {},
-        geometry: {
-          type: 'Polygon' as const,
-          coordinates: [circlePoints],
-        },
-      };
+      circlePoints.push(circlePoints[0]);
 
       map.addSource(sourceId, {
         type: 'geojson',
-        data: geojson,
+        data: {
+          type: 'Feature',
+          properties: {},
+          geometry: { type: 'Polygon', coordinates: [circlePoints] },
+        },
       });
 
       map.addLayer({
@@ -247,41 +248,131 @@ export default function EVMap() {
         },
       });
 
-      // Update on map move
       const updateCircle = () => {
         const c = map.getCenter();
-        const points: [number, number][] = [];
+        const pts: [number, number][] = [];
+        const rLat = rangeMiles / 69;
+        const rLng = rangeMiles / (69 * Math.cos((c.lat * Math.PI) / 180));
         for (let i = 0; i <= 64; i++) {
-          const angle = (i * 2 * Math.PI) / 64;
-          points.push([
-            c.lng + radiusDegLng * Math.cos(angle),
-            c.lat + radiusDegLat * Math.sin(angle),
-          ]);
+          const a = (i * 2 * Math.PI) / 64;
+          pts.push([c.lng + rLng * Math.cos(a), c.lat + rLat * Math.sin(a)]);
         }
-        points.push(points[0]);
+        pts.push(pts[0]);
         const src = map.getSource(sourceId) as maplibregl.GeoJSONSource | undefined;
         if (src) {
           src.setData({
             type: 'Feature',
             properties: {},
-            geometry: {
-              type: 'Polygon',
-              coordinates: [points],
-            },
+            geometry: { type: 'Polygon', coordinates: [pts] },
           });
         }
       };
 
       map.on('move', updateCircle);
-      return () => {
-        map.off('move', updateCircle);
-      };
+      return () => { map.off('move', updateCircle); };
     }
   }, [showRange, rangeMiles, mapReady]);
+
+  // Trip route line
+  useEffect(() => {
+    if (!mapRef.current || !mapReady) return;
+    const map = mapRef.current;
+    const srcId = 'trip-route';
+    const lineId = 'trip-route-line';
+    const originDotId = 'trip-origin-dot';
+    const destDotId = 'trip-dest-dot';
+
+    // Remove existing layers
+    [lineId, originDotId, destDotId].forEach((id) => {
+      if (map.getLayer(id)) map.removeLayer(id);
+    });
+    if (map.getSource(srcId)) map.removeSource(srcId);
+
+    if (tripOrigin && tripDestination) {
+      // Draw route line + endpoint dots
+      map.addSource(srcId, {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              properties: { kind: 'route' },
+              geometry: {
+                type: 'LineString',
+                coordinates: [
+                  [tripOrigin.lng, tripOrigin.lat],
+                  [tripDestination.lng, tripDestination.lat],
+                ],
+              },
+            },
+            {
+              type: 'Feature',
+              properties: { kind: 'origin' },
+              geometry: {
+                type: 'Point',
+                coordinates: [tripOrigin.lng, tripOrigin.lat],
+              },
+            },
+            {
+              type: 'Feature',
+              properties: { kind: 'dest' },
+              geometry: {
+                type: 'Point',
+                coordinates: [tripDestination.lng, tripDestination.lat],
+              },
+            },
+          ],
+        },
+      });
+
+      map.addLayer({
+        id: lineId,
+        type: 'line',
+        source: srcId,
+        filter: ['==', ['get', 'kind'], 'route'],
+        layout: { 'line-cap': 'round' },
+        paint: {
+          'line-color': '#3b82f6',
+          'line-width': 4,
+          'line-opacity': 0.8,
+          'line-dasharray': [2, 2],
+        },
+      });
+
+      map.addLayer({
+        id: originDotId,
+        type: 'circle',
+        source: srcId,
+        filter: ['==', ['get', 'kind'], 'origin'],
+        paint: {
+          'circle-radius': 8,
+          'circle-color': '#22c55e',
+          'circle-stroke-width': 3,
+          'circle-stroke-color': '#ffffff',
+        },
+      });
+
+      map.addLayer({
+        id: destDotId,
+        type: 'circle',
+        source: srcId,
+        filter: ['==', ['get', 'kind'], 'dest'],
+        paint: {
+          'circle-radius': 8,
+          'circle-color': '#ef4444',
+          'circle-stroke-width': 3,
+          'circle-stroke-color': '#ffffff',
+        },
+      });
+    }
+  }, [tripOrigin, tripDestination, mapReady]);
 
   // Fly to selected charger
   useEffect(() => {
     if (selectedCharger && mapRef.current) {
+      const cKey = `${selectedCharger.lng.toFixed(4)},${selectedCharger.lat.toFixed(4)}`;
+      lastFlyToCenter.current = cKey;
       mapRef.current.flyTo({
         center: [selectedCharger.lng, selectedCharger.lat],
         zoom: 15,

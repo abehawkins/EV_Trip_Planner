@@ -8,28 +8,29 @@ import SearchBar from '@/components/ev/search-bar';
 import RangeControl from '@/components/ev/range-control';
 import FilterBar from '@/components/ev/filter-bar';
 import SidebarContent from '@/components/ev/sidebar-content';
+import TripPlanner from '@/components/ev/trip-planner';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import {
   PanelLeftClose, PanelLeftOpen, BatteryCharging, Crosshair,
-  Zap, RotateCcw, Loader2,
+  Zap, RotateCcw, Loader2, Route,
 } from 'lucide-react';
 
 export default function Home() {
-  // All hooks must be called before any conditional return
   const {
     sidebarOpen, setSidebarOpen,
     chargersLoading, chargers,
-    showPOIs, setMapCenter, setMapZoom,
+    showPOIs,
+    tripMode, setTripMode,
+    setMapCenter, setMapZoom,
   } = useEVStore();
 
   const [locating, setLocating] = useState(false);
 
-  // Detect client mount without setState-in-effect (React 19 pattern)
   const mounted = useSyncExternalStore(
-    () => () => {}, // no-op subscribe
-    () => true,      // client snapshot
-    () => false      // server snapshot
+    () => () => {},
+    () => true,
+    () => false
   );
 
   const store = useEVStore();
@@ -58,8 +59,9 @@ export default function Home() {
       (pos) => {
         setMapCenter([pos.coords.longitude, pos.coords.latitude]);
         setMapZoom(13);
+        store.triggerFlyTo(13);
         setLocating(false);
-        setTimeout(() => fetchChargersAndPOIs(), 500);
+        setTimeout(() => fetchChargersAndPOIs(), 1600);
       },
       () => setLocating(false),
       { enableHighAccuracy: true, timeout: 10000 }
@@ -92,10 +94,24 @@ export default function Home() {
           <span className="font-bold text-sm tracking-tight">EV Companion</span>
         </div>
 
-        {/* Search */}
-        <div className="flex-1 flex justify-center">
-          <SearchBar />
-        </div>
+        {/* Search — only show in non-trip mode */}
+        {!tripMode && (
+          <div className="flex-1 flex justify-center pointer-events-auto">
+            <SearchBar />
+          </div>
+        )}
+
+        {/* Trip mode toggle */}
+        {!tripMode && (
+          <Button
+            variant="secondary"
+            className="h-9 px-3 bg-white/95 backdrop-blur-sm shadow-lg border-0 pointer-events-auto rounded-xl gap-1.5 text-xs"
+            onClick={() => setTripMode(true)}
+          >
+            <Route className="h-4 w-4 text-blue-500" />
+            <span className="hidden sm:inline">Plan Trip</span>
+          </Button>
+        )}
 
         {/* Locate me */}
         <Button
@@ -147,6 +163,24 @@ export default function Home() {
                 </div>
               </>
             )}
+            {tripMode && (
+              <>
+                <Separator className="my-1.5" />
+                <div className="font-semibold text-xs mb-1">Trip Route</div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-green-500 border border-white" />
+                  <span>Starting Point</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-red-500 border border-white" />
+                  <span>Destination</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-0.5 bg-blue-500 rounded" />
+                  <span>Route Line</span>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Stats bar - bottom right */}
@@ -173,6 +207,16 @@ export default function Home() {
           }`}
         >
           <div className="flex flex-col h-full pt-16 min-w-[380px]">
+            {/* Trip planner (shown in sidebar when in trip mode) */}
+            {tripMode && (
+              <>
+                <div className="px-3 pt-3">
+                  <TripPlanner />
+                </div>
+                <Separator className="mx-3 my-2" />
+              </>
+            )}
+
             {/* Range control */}
             <RangeControl />
 

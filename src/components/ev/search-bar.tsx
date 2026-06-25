@@ -12,8 +12,16 @@ interface SearchResult {
   lng: number;
 }
 
-export default function SearchBar() {
-  const [query, setQuery] = useState('');
+interface SearchBarProps {
+  /** If provided, used as label placeholder; hides the single-search behavior */
+  mode?: 'single' | 'origin' | 'destination';
+  onSelect?: (name: string, lat: number, lng: number) => void;
+  value?: string;
+  onClear?: () => void;
+}
+
+export default function SearchBar({ mode = 'single', onSelect, value, onClear }: SearchBarProps) {
+  const [query, setQuery] = useState(value || '');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
@@ -21,7 +29,11 @@ export default function SearchBar() {
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const { setMapCenter, setMapZoom } = useEVStore();
+  const placeholder = mode === 'origin'
+    ? 'Starting point...'
+    : mode === 'destination'
+      ? 'Destination...'
+      : 'Search city, address, or zip...';
 
   const doSearch = useCallback(async (q: string) => {
     if (q.length < 2) {
@@ -41,21 +53,42 @@ export default function SearchBar() {
     }
   }, []);
 
-  const handleChange = (value: string) => {
-    setQuery(value);
+  const handleChange = (v: string) => {
+    setQuery(v);
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => doSearch(value), 400);
+    debounceRef.current = setTimeout(() => doSearch(v), 400);
   };
 
   const selectResult = (r: SearchResult) => {
-    setQuery(r.displayName.split(',').slice(0, 2).join(','));
-    setMapCenter([r.lng, r.lat]);
-    setMapZoom(13);
+    const shortName = r.displayName.split(',').slice(0, 2).join(',');
+    setQuery(shortName);
     setShowResults(false);
     setResults([]);
-    // Fetch data for new location after map flies there
-    setTimeout(() => { fetchChargersAndPOIs(); }, 600);
+
+    if (mode === 'single') {
+      // Standard search: fly to location and fetch data
+      const store = useEVStore.getState();
+      store.setMapCenter([r.lng, r.lat]);
+      store.setMapZoom(13);
+      store.triggerFlyTo(13);
+      setTimeout(() => { fetchChargersAndPOIs(); }, 1600);
+    } else if (onSelect) {
+      // Trip origin/destination
+      onSelect(shortName, r.lat, r.lng);
+    }
   };
+
+  const handleClear = () => {
+    setQuery('');
+    setResults([]);
+    setShowResults(false);
+    if (onClear) onClear();
+  };
+
+  // Sync external value changes (trip mode clear)
+  useEffect(() => {
+    if (value !== undefined) setQuery(value);
+  }, [value]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -69,20 +102,28 @@ export default function SearchBar() {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-md" style={{ zIndex: 1000 }}>
+    <div ref={containerRef} className="relative w-full" style={{ zIndex: 1000 }}>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        {mode === 'origin' && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 rounded-full bg-green-500 border-2 border-white shadow z-10" />
+        )}
+        {mode === 'destination' && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 rounded-full bg-red-500 border-2 border-white shadow z-10" />
+        )}
+        {mode === 'single' && (
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        )}
         <Input
           ref={inputRef}
           value={query}
           onChange={(e) => handleChange(e.target.value)}
           onFocus={() => results.length > 0 && setShowResults(true)}
-          placeholder="Search city, address, or zip..."
-          className="pl-9 pr-8 h-10 bg-white/95 backdrop-blur-sm border-0 shadow-lg rounded-full text-sm"
+          placeholder={placeholder}
+          className={`${mode !== 'single' ? 'pl-8' : 'pl-9'} pr-8 h-9 bg-white/95 backdrop-blur-sm border border-border/60 shadow-lg rounded-lg text-sm`}
         />
         {query && (
           <button
-            onClick={() => { setQuery(''); setResults([]); setShowResults(false); }}
+            onClick={handleClear}
             className="absolute right-3 top-1/2 -translate-y-1/2"
           >
             <X className="h-4 w-4 text-muted-foreground" />
