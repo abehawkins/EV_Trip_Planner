@@ -30,10 +30,10 @@ export default function SearchBar({ mode = 'single', onSelect, value, onClear }:
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
   const placeholder = mode === 'origin'
-    ? 'Starting point...'
+    ? 'US starting point...'
     : mode === 'destination'
-      ? 'Destination...'
-      : 'Search city, address, or zip...';
+      ? 'US destination...'
+      : 'Search US city, address, or zip...';
 
   const doSearch = useCallback(async (q: string) => {
     if (q.length < 2) {

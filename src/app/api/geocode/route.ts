@@ -14,8 +14,10 @@ export async function GET(request: NextRequest) {
     const params = new URLSearchParams({
       q: query,
       format: 'json',
-      limit: '5',
+      limit: '8',
       addressdetails: '1',
+      countrycodes: 'us',
+      bounded: '0',
     });
 
     const response = await fetch(`${NOMINATIM_API}?${params.toString()}`, {
