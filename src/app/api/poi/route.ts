@@ -99,12 +99,21 @@ export async function GET(request: NextRequest) {
 
       if (response.ok) {
         const data = await response.json();
-        const pois = (data.elements || []).map((el: Record<string, unknown>) => ({
+
+        interface OverpassElement {
+          id: number;
+          lat?: number;
+          lon?: number;
+          center?: { lat: number; lon: number };
+          tags?: Record<string, string>;
+        }
+
+        const pois = (data.elements || []).map((el: OverpassElement) => ({
           id: el.id,
           name: el.tags?.name || el.tags?.['name:en'] || 'Unnamed',
           type: el.tags?.amenity || el.tags?.leisure || el.tags?.tourism || el.tags?.shop || 'unknown',
-          lat: (el.lat as number) || (el.center?.lat as number) || 0,
-          lng: (el.lon as number) || (el.center?.lon as number) || 0,
+          lat: el.lat || el.center?.lat || 0,
+          lng: el.lon || el.center?.lon || 0,
           dogFriendly: el.tags?.dog === 'yes' || el.tags?.dogs === 'yes' || false,
           outdoorSeating: el.tags?.outdoor_seating === 'yes' || false,
           cuisine: el.tags?.cuisine || '',

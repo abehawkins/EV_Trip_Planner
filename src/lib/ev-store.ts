@@ -49,6 +49,19 @@ export interface TripPoint {
   lng: number;
 }
 
+export interface TripRoute {
+  geometry: [number, number][];
+  distanceMiles: number;
+  durationMinutes: number;
+}
+
+export interface ChargeStop {
+  charger: Charger;
+  distanceFromStart: number;
+  estimatedBatteryOnArrival: number;
+  estimatedBatteryOnDeparture: number;
+}
+
 interface EVStore {
   // Map state
   mapCenter: [number, number];
@@ -56,8 +69,6 @@ interface EVStore {
   setMapCenter: (center: [number, number]) => void;
   setMapZoom: (zoom: number) => void;
 
-  // Fly-to trigger: increment to tell the map to fly to mapCenter
-  // This avoids the feedback loop where moveend -> setMapCenter -> flyTo
   flyToTrigger: number;
   flyToZoom: number;
   triggerFlyTo: (zoom: number) => void;
@@ -107,29 +118,34 @@ interface EVStore {
   setTripOrigin: (p: TripPoint | null) => void;
   tripDestination: TripPoint | null;
   setTripDestination: (p: TripPoint | null) => void;
+  tripRoute: TripRoute | null;
+  setTripRoute: (r: TripRoute | null) => void;
+  tripRouteLoading: boolean;
+  setTripRouteLoading: (l: boolean) => void;
+  chargeStops: ChargeStop[];
+  setChargeStops: (s: ChargeStop[]) => void;
+
+  // Mobile sidebar (drawer)
+  mobileDrawerOpen: boolean;
+  setMobileDrawerOpen: (o: boolean) => void;
 }
 
 export const useEVStore = create<EVStore>((set) => ({
-  // Map defaults: center of US
   mapCenter: [-98.5795, 39.8283],
   mapZoom: 4,
   setMapCenter: (center) => set({ mapCenter: center }),
   setMapZoom: (zoom) => set({ mapZoom: zoom }),
 
-  // Fly-to trigger
   flyToTrigger: 0,
   flyToZoom: 4,
   triggerFlyTo: (zoom) => set((s) => ({ flyToTrigger: s.flyToTrigger + 1, flyToZoom: zoom })),
 
-  // Vehicle range (miles)
   rangeMiles: 200,
   setRangeMiles: (miles) => set({ rangeMiles: miles }),
 
-  // Search
   searchQuery: '',
   setSearchQuery: (q) => set({ searchQuery: q }),
 
-  // Chargers
   chargers: [],
   setChargers: (c) => set({ chargers: c }),
   chargersLoading: false,
@@ -137,13 +153,11 @@ export const useEVStore = create<EVStore>((set) => ({
   selectedCharger: null,
   setSelectedCharger: (c) => set({ selectedCharger: c }),
 
-  // POIs
   pois: [],
   setPois: (p) => set({ pois: p }),
   poisLoading: false,
   setPoisLoading: (l) => set({ poisLoading: l }),
 
-  // Filters
   chargerType: 'all',
   setChargerType: (t) => set({ chargerType: t }),
   showPOIs: false,
@@ -155,15 +169,22 @@ export const useEVStore = create<EVStore>((set) => ({
   showRange: true,
   setShowRange: (s) => set({ showRange: s }),
 
-  // Sidebar
   sidebarOpen: true,
   setSidebarOpen: (o) => set({ sidebarOpen: o }),
 
-  // Trip planning
   tripMode: false,
   setTripMode: (v) => set({ tripMode: v }),
   tripOrigin: null,
   setTripOrigin: (p) => set({ tripOrigin: p }),
   tripDestination: null,
   setTripDestination: (p) => set({ tripDestination: p }),
+  tripRoute: null,
+  setTripRoute: (r) => set({ tripRoute: r }),
+  tripRouteLoading: false,
+  setTripRouteLoading: (l) => set({ tripRouteLoading: l }),
+  chargeStops: [],
+  setChargeStops: (s) => set({ chargeStops: s }),
+
+  mobileDrawerOpen: false,
+  setMobileDrawerOpen: (o) => set({ mobileDrawerOpen: o }),
 }));
