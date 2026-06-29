@@ -1,11 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { useEVStore, Charger, ChargeStop } from '@/lib/ev-store';
+import { getSavedTrips, saveTrip, deleteSavedTrip, type SavedTrip } from '@/lib/saved-trips';
 import SearchBar from './search-bar';
 import { Button } from '@/components/ui/button';
 import {
   Navigation, X, Route, RotateCcw, ArrowDown, Zap, Battery, Clock,
-  BatteryWarning, Loader2, CheckCircle2,
+  BatteryWarning, Loader2, CheckCircle2, Bookmark, BookmarkPlus, Trash2,
+  FolderOpen,
 } from 'lucide-react';
 
 function haversineMiles(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -160,6 +163,41 @@ export default function TripPlanner() {
     setChargers, setChargersLoading,
     chargerType,
   } = useEVStore();
+
+  const [savedTrips, setSavedTrips] = useState<SavedTrip[]>(() => getSavedTrips());
+  const [showSaved, setShowSaved] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
+
+  const handleSaveTrip = () => {
+    if (!tripOrigin || !tripDestination || !tripRoute) return;
+    const originShort = tripOrigin.name.split(',')[0];
+    const destShort = tripDestination.name.split(',')[0];
+    const name = `${originShort} → ${destShort}`;
+    saveTrip({ name, origin: tripOrigin, destination: tripDestination, route: tripRoute, chargeStops, rangeMiles });
+    setSavedTrips(getSavedTrips());
+    setJustSaved(true);
+    setTimeout(() => setJustSaved(false), 2000);
+  };
+
+  const handleLoadTrip = (trip: SavedTrip) => {
+    setTripOrigin(trip.origin);
+    setTripDestination(trip.destination);
+    setTripRoute(trip.route);
+    setChargeStops(trip.chargeStops);
+    setChargers(trip.chargeStops.map((s) => s.charger));
+
+    const midLat = (trip.origin.lat + trip.destination.lat) / 2;
+    const midLng = (trip.origin.lng + trip.destination.lng) / 2;
+    setMapCenter([midLng, midLat]);
+    const zoom = Math.max(5, 10 - Math.log2(trip.route.distanceMiles / 50));
+    triggerFlyTo(zoom);
+    setShowSaved(false);
+  };
+
+  const handleDeleteTrip = (id: string) => {
+    deleteSavedTrip(id);
+    setSavedTrips(getSavedTrips());
+  };
 
   const handleOriginSelect = (name: string, lat: number, lng: number) => {
     setTripOrigin({ name, lat, lng });
@@ -401,6 +439,18 @@ export default function TripPlanner() {
           )}
           {tripRouteLoading ? 'Planning...' : 'Plan Trip'}
         </Button>
+        {tripRoute && (
+          <Button
+            variant="outline"
+            size="sm"
+            className={`h-8 text-xs gap-1.5 ${justSaved ? 'text-green-600 border-green-300' : ''}`}
+            onClick={handleSaveTrip}
+            title="Save this trip"
+          >
+            {justSaved ? <Bookmark className="h-3.5 w-3.5 fill-green-600" /> : <BookmarkPlus className="h-3.5 w-3.5" />}
+            {justSaved ? 'Saved!' : 'Save'}
+          </Button>
+        )}
         {(tripOrigin || tripDestination) && (
           <Button
             variant="outline"
@@ -411,6 +461,54 @@ export default function TripPlanner() {
             <RotateCcw className="h-3.5 w-3.5" />
             Clear
           </Button>
+        )}
+      </div>
+
+      {/* Saved Trips */}
+      <div>
+        <button
+          onClick={() => setShowSaved(!showSaved)}
+          className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider w-full"
+        >
+          <FolderOpen className="h-3 w-3" />
+          Saved Trips ({savedTrips.length})
+          <span className={`ml-auto text-[10px] transition-transform ${showSaved ? 'rotate-180' : ''}`}>▼</span>
+        </button>
+
+        {showSaved && (
+          <div className="mt-1.5 space-y-1">
+            {savedTrips.length === 0 ? (
+              <p className="text-[11px] text-muted-foreground py-2 text-center">
+                No saved trips yet. Plan a trip and click Save.
+              </p>
+            ) : (
+              savedTrips.map((trip) => (
+                <div
+                  key={trip.id}
+                  className="flex items-center gap-1.5 bg-white dark:bg-card rounded-md px-2.5 py-1.5 shadow-sm text-xs group cursor-pointer hover:bg-accent/50 transition-colors"
+                  onClick={() => handleLoadTrip(trip)}
+                >
+                  <Bookmark className="h-3 w-3 text-blue-500 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium truncate">{trip.name}</div>
+                    <div className="text-[10px] text-muted-foreground">
+                      {trip.route.distanceMiles.toFixed(0)} mi · {formatDuration(trip.route.durationMinutes)} · {trip.rangeMiles} mi range
+                    </div>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteTrip(trip.id);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:text-red-500"
+                    title="Delete saved trip"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
         )}
       </div>
     </div>
