@@ -134,10 +134,25 @@ export default function Home() {
           <Button
             variant="secondary"
             className="h-9 px-3 bg-white/95 dark:bg-zinc-800/95 backdrop-blur-sm shadow-lg border-0 pointer-events-auto rounded-xl gap-1.5 text-xs"
-            onClick={() => setTripMode(true)}
+            onClick={() => {
+              setTripMode(true);
+              setMobileDrawerOpen(true);
+            }}
           >
             <Route className="h-4 w-4 text-blue-500" />
             <span className="hidden sm:inline">Plan Trip</span>
+          </Button>
+        )}
+
+        {/* Mobile: show trip planner button when in trip mode */}
+        {tripMode && (
+          <Button
+            variant="secondary"
+            className="h-9 px-3 bg-blue-500 text-white backdrop-blur-sm shadow-lg border-0 pointer-events-auto rounded-xl gap-1.5 text-xs sm:hidden"
+            onClick={() => setMobileDrawerOpen(true)}
+          >
+            <Route className="h-4 w-4" />
+            Trip
           </Button>
         )}
 
@@ -220,7 +235,13 @@ export default function Home() {
             >
               <ChevronUp className="h-4 w-4 text-muted-foreground" />
               <div className="flex items-center gap-3 text-xs">
-                {chargers.length > 0 && (
+                {tripMode && (
+                  <span className="flex items-center gap-1 font-semibold text-blue-600">
+                    <Route className="h-3 w-3" />
+                    Trip Planner
+                  </span>
+                )}
+                {!tripMode && chargers.length > 0 && (
                   <>
                     <span className="font-semibold">{chargers.length} stations</span>
                     <span className="flex items-center gap-1">
@@ -229,7 +250,7 @@ export default function Home() {
                     </span>
                   </>
                 )}
-                {chargers.length === 0 && (
+                {!tripMode && chargers.length === 0 && (
                   <span className="text-muted-foreground">Tap to see filters & results</span>
                 )}
               </div>
