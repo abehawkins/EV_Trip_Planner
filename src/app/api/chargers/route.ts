@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
   // Try NREL API first
   try {
     const params = new URLSearchParams({
-      api_key: 'DEMO_KEY',
+      api_key: process.env.NREL_API_KEY || 'DEMO_KEY',
       fuel_type: 'ELEC',
       latitude: lat.toString(),
       longitude: lng.toString(),
@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
     const stations = data.fuel_stations || [];
 
-    const chargers = stations.map((s: Record<string, unknown>) => transformStation(s, s.distance ? parseFloat(s.distance as string) : null));
+    const chargers = stations.map((s: Record<string, unknown>) => transformStation(s, s.distance ? parseFloat(s.distance as string) : 0));
     return NextResponse.json({ chargers, total: chargers.length });
   } catch {
     // Fallback to sample data with proximity filtering

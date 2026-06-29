@@ -29,7 +29,7 @@ export default function RangeControl() {
           max={500}
           step={10}
           className="w-full"
-          onRelease={() => fetchChargersAndPOIs()}
+          onValueCommit={() => fetchChargersAndPOIs()}
         />
       </div>
     </div>

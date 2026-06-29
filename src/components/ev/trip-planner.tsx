@@ -1,11 +1,12 @@
 'use client';
 
-import { useEVStore } from '@/lib/ev-store';
-import { fetchChargersAndPOIs } from '@/lib/ev-fetch';
+import { useEVStore, Charger, ChargeStop } from '@/lib/ev-store';
 import SearchBar from './search-bar';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Navigation, X, Route, RotateCcw, ArrowDown, Zap, MapPin } from 'lucide-react';
+import {
+  Navigation, X, Route, RotateCcw, ArrowDown, Zap, Battery, Clock,
+  BatteryWarning, Loader2, CheckCircle2,
+} from 'lucide-react';
 
 function haversineMiles(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 3959;
@@ -18,24 +19,132 @@ function haversineMiles(lat1: number, lng1: number, lat2: number, lng2: number):
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-function generateIntermediatePoints(
-  origin: { lat: number; lng: number },
-  dest: { lat: number; lng: number },
-  rangeMiles: number
+function samplePointsAlongRoute(
+  geometry: [number, number][],
+  intervalMiles: number,
 ): { lat: number; lng: number }[] {
-  const dist = haversineMiles(origin.lat, origin.lng, dest.lat, dest.lng);
-  // Place a point every 80% of range to ensure overlapping coverage
-  const stepMiles = Math.max(rangeMiles * 0.7, 30);
-  const numPoints = Math.max(2, Math.ceil(dist / stepMiles) + 1);
+  if (geometry.length < 2) return [];
   const points: { lat: number; lng: number }[] = [];
-  for (let i = 0; i <= numPoints; i++) {
-    const frac = i / numPoints;
-    points.push({
-      lat: origin.lat + (dest.lat - origin.lat) * frac,
-      lng: origin.lng + (dest.lng - origin.lng) * frac,
-    });
+  let accumulated = 0;
+  let nextTarget = intervalMiles;
+
+  for (let i = 1; i < geometry.length; i++) {
+    const [lng1, lat1] = geometry[i - 1];
+    const [lng2, lat2] = geometry[i];
+    const segDist = haversineMiles(lat1, lng1, lat2, lng2);
+
+    while (accumulated + segDist >= nextTarget && nextTarget > 0) {
+      const frac = (nextTarget - accumulated) / segDist;
+      const midLat = lat1 + (lat2 - lat1) * frac;
+      const midLng = lng1 + (lng2 - lng1) * frac;
+      points.push({ lat: midLat, lng: midLng });
+      nextTarget += intervalMiles;
+    }
+    accumulated += segDist;
   }
   return points;
+}
+
+function distanceAlongRoute(
+  geometry: [number, number][],
+  targetLat: number,
+  targetLng: number,
+): number {
+  let minDist = Infinity;
+  let bestAccum = 0;
+  let accumulated = 0;
+
+  for (let i = 0; i < geometry.length; i++) {
+    const [lng, lat] = geometry[i];
+    const d = haversineMiles(lat, lng, targetLat, targetLng);
+    if (d < minDist) {
+      minDist = d;
+      bestAccum = accumulated;
+    }
+    if (i > 0) {
+      const [pLng, pLat] = geometry[i - 1];
+      accumulated += haversineMiles(pLat, pLng, lat, lng);
+    }
+  }
+  return bestAccum;
+}
+
+function computeOptimalStops(
+  chargers: Charger[],
+  routeGeometry: [number, number][],
+  routeDistanceMiles: number,
+  rangeMiles: number,
+): ChargeStop[] {
+  const usableRange = rangeMiles * 0.85;
+  if (routeDistanceMiles <= usableRange) return [];
+
+  const chargersWithDist = chargers.map((c) => ({
+    charger: c,
+    routeDist: distanceAlongRoute(routeGeometry, c.lat, c.lng),
+    perpDist: (() => {
+      let min = Infinity;
+      for (const [lng, lat] of routeGeometry) {
+        min = Math.min(min, haversineMiles(lat, lng, c.lat, c.lng));
+      }
+      return min;
+    })(),
+  }));
+
+  const nearRoute = chargersWithDist
+    .filter((c) => c.perpDist < 15)
+    .sort((a, b) => a.routeDist - b.routeDist);
+
+  const stops: ChargeStop[] = [];
+  let currentRange = usableRange;
+  let distanceTraveled = 0;
+
+  while (distanceTraveled + currentRange < routeDistanceMiles) {
+    const maxReach = distanceTraveled + currentRange;
+    const candidates = nearRoute.filter(
+      (c) => c.routeDist > distanceTraveled + 10 && c.routeDist <= maxReach
+    );
+
+    if (candidates.length === 0) {
+      const ahead = nearRoute.filter((c) => c.routeDist > distanceTraveled + 10);
+      if (ahead.length === 0) break;
+      const nearest = ahead[0];
+      stops.push({
+        charger: nearest.charger,
+        distanceFromStart: nearest.routeDist,
+        estimatedBatteryOnArrival: Math.max(0, (1 - (nearest.routeDist - distanceTraveled) / rangeMiles) * 100),
+        estimatedBatteryOnDeparture: 80,
+      });
+      distanceTraveled = nearest.routeDist;
+      currentRange = usableRange;
+      continue;
+    }
+
+    const preferDCFast = candidates.filter((c) =>
+      c.charger.connections.some((conn) => conn.level === 3)
+    );
+    const pick = preferDCFast.length > 0
+      ? preferDCFast[preferDCFast.length - 1]
+      : candidates[candidates.length - 1];
+
+    const legDist = pick.routeDist - distanceTraveled;
+    stops.push({
+      charger: pick.charger,
+      distanceFromStart: pick.routeDist,
+      estimatedBatteryOnArrival: Math.max(0, (1 - legDist / rangeMiles) * 100),
+      estimatedBatteryOnDeparture: 80,
+    });
+    distanceTraveled = pick.routeDist;
+    currentRange = usableRange;
+  }
+
+  return stops;
+}
+
+function formatDuration(minutes: number): string {
+  const hrs = Math.floor(minutes / 60);
+  const mins = Math.round(minutes % 60);
+  if (hrs === 0) return `${mins} min`;
+  return `${hrs}h ${mins}m`;
 }
 
 export default function TripPlanner() {
@@ -43,13 +152,14 @@ export default function TripPlanner() {
     tripOrigin, setTripOrigin,
     tripDestination, setTripDestination,
     tripMode, setTripMode,
+    tripRoute, setTripRoute,
+    tripRouteLoading, setTripRouteLoading,
+    chargeStops, setChargeStops,
     rangeMiles,
     setMapCenter, triggerFlyTo,
+    setChargers, setChargersLoading,
+    chargerType,
   } = useEVStore();
-
-  const directDistance = tripOrigin && tripDestination
-    ? haversineMiles(tripOrigin.lat, tripOrigin.lng, tripDestination.lat, tripDestination.lng)
-    : null;
 
   const handleOriginSelect = (name: string, lat: number, lng: number) => {
     setTripOrigin({ name, lat, lng });
@@ -59,72 +169,103 @@ export default function TripPlanner() {
     setTripDestination({ name, lat, lng });
   };
 
-  const handleClearOrigin = () => { setTripOrigin(null); };
-  const handleClearDest = () => { setTripDestination(null); };
+  const handleClearOrigin = () => {
+    setTripOrigin(null);
+    setTripRoute(null);
+    setChargeStops([]);
+  };
+  const handleClearDest = () => {
+    setTripDestination(null);
+    setTripRoute(null);
+    setChargeStops([]);
+  };
 
-  const handleFindChargers = () => {
+  const handlePlanTrip = async () => {
     if (!tripOrigin || !tripDestination) return;
 
-    const points = generateIntermediatePoints(tripOrigin, tripDestination, rangeMiles);
+    setTripRouteLoading(true);
+    setTripRoute(null);
+    setChargeStops([]);
 
-    // Fly to fit both points
-    const midLat = (tripOrigin.lat + tripDestination.lat) / 2;
-    const midLng = (tripOrigin.lng + tripDestination.lng) / 2;
-    setMapCenter([midLng, midLat]);
-    const dist = directDistance || 100;
-    const zoom = Math.max(5, 10 - Math.log2(dist / 50));
-    triggerFlyTo(zoom);
-
-    // Fetch chargers for each intermediate point
-    const store = useEVStore.getState();
-    store.setChargersLoading(true);
-    store.setChargers([]);
-
-    // Batch fetch — collect all unique chargers
-    const fetches = points.map(async (pt) => {
+    try {
       const params = new URLSearchParams({
-        lat: pt.lat.toString(),
-        lng: pt.lng.toString(),
-        distance: rangeMiles.toString(),
-        maxresults: '50',
+        originLat: tripOrigin.lat.toString(),
+        originLng: tripOrigin.lng.toString(),
+        destLat: tripDestination.lat.toString(),
+        destLng: tripDestination.lng.toString(),
       });
-      if (store.chargerType !== 'all') params.set('chargerType', store.chargerType);
-      try {
-        const res = await fetch(`/api/chargers?${params}`);
-        const data = await res.json();
-        return data.chargers || [];
-      } catch {
-        return [];
-      }
-    });
 
-    Promise.all(fetches).then((allChargers) => {
-      // Deduplicate by id
+      const res = await fetch(`/api/route-plan?${params}`);
+      if (!res.ok) throw new Error('Route not found');
+      const data = await res.json();
+
+      const route = {
+        geometry: data.geometry as [number, number][],
+        distanceMiles: data.distanceMiles as number,
+        durationMinutes: data.durationMinutes as number,
+      };
+      setTripRoute(route);
+
+      const midLat = (tripOrigin.lat + tripDestination.lat) / 2;
+      const midLng = (tripOrigin.lng + tripDestination.lng) / 2;
+      setMapCenter([midLng, midLat]);
+      const zoom = Math.max(5, 10 - Math.log2(route.distanceMiles / 50));
+      triggerFlyTo(zoom);
+
+      setChargersLoading(true);
+      setChargers([]);
+      const samplePoints = samplePointsAlongRoute(route.geometry, Math.max(rangeMiles * 0.6, 30));
+      const allPoints = [
+        { lat: tripOrigin.lat, lng: tripOrigin.lng },
+        ...samplePoints,
+        { lat: tripDestination.lat, lng: tripDestination.lng },
+      ];
+
+      const fetches = allPoints.map(async (pt) => {
+        const p = new URLSearchParams({
+          lat: pt.lat.toString(),
+          lng: pt.lng.toString(),
+          distance: Math.min(rangeMiles, 50).toString(),
+          maxresults: '50',
+        });
+        if (chargerType !== 'all') p.set('chargerType', chargerType);
+        try {
+          const r = await fetch(`/api/chargers?${p}`);
+          const d = await r.json();
+          return (d.chargers || []) as Charger[];
+        } catch {
+          return [];
+        }
+      });
+
+      const allChargers = await Promise.all(fetches);
       const seen = new Set<number>();
-      const unique: typeof allChargers[0][] = [];
+      const unique: Charger[] = [];
       for (const batch of allChargers) {
         for (const c of batch) {
           if (!seen.has(c.id)) {
             seen.add(c.id);
-            // Compute distance to route line for sorting
             unique.push(c);
           }
         }
       }
-      // Sort by proximity to route midpoint
-      unique.sort((a, b) => {
-        const dA = haversineMiles(a.lat, a.lng, midLat, midLng);
-        const dB = haversineMiles(b.lat, b.lng, midLat, midLng);
-        return dA - dB;
-      });
-      store.setChargers(unique.slice(0, 100));
-      store.setChargersLoading(false);
-    });
+      setChargers(unique);
+      setChargersLoading(false);
+
+      const stops = computeOptimalStops(unique, route.geometry, route.distanceMiles, rangeMiles);
+      setChargeStops(stops);
+    } catch (err) {
+      console.error('Trip planning failed:', err);
+    } finally {
+      setTripRouteLoading(false);
+    }
   };
 
   const handleClearTrip = () => {
     setTripOrigin(null);
     setTripDestination(null);
+    setTripRoute(null);
+    setChargeStops([]);
   };
 
   const handleSwapPoints = () => {
@@ -133,6 +274,8 @@ export default function TripPlanner() {
     const d = store.tripDestination;
     store.setTripOrigin(d);
     store.setTripDestination(o);
+    store.setTripRoute(null);
+    store.setChargeStops([]);
   };
 
   const handleExitTripMode = () => {
@@ -160,9 +303,9 @@ export default function TripPlanner() {
         </Button>
       </div>
 
-      {/* Origin / Destination inputs stacked */}
       <div className="relative space-y-1.5">
         <SearchBar
+          key={`origin-${tripOrigin?.name || 'empty'}`}
           mode="origin"
           onSelect={handleOriginSelect}
           value={tripOrigin?.name || ''}
@@ -178,6 +321,7 @@ export default function TripPlanner() {
           </button>
         </div>
         <SearchBar
+          key={`dest-${tripDestination?.name || 'empty'}`}
           mode="destination"
           onSelect={handleDestSelect}
           value={tripDestination?.name || ''}
@@ -185,22 +329,58 @@ export default function TripPlanner() {
         />
       </div>
 
-      {/* Trip info + actions */}
-      {directDistance !== null && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
-          <Navigation className="h-3.5 w-3.5 shrink-0" />
-          <span>
-            <strong className="text-foreground">{directDistance.toFixed(0)} mi</strong> direct distance
-          </span>
-          <span className="text-muted-foreground">·</span>
-          <span>Range: <strong className="text-green-600">{rangeMiles} mi</strong></span>
-          {directDistance > rangeMiles && (
-            <>
-              <span className="text-muted-foreground">·</span>
-              <span className="text-orange-600 font-medium">
-                ~{Math.ceil(directDistance / rangeMiles)} charge stop{Math.ceil(directDistance / rangeMiles) > 1 ? 's' : ''} needed
-              </span>
-            </>
+      {tripRoute && (
+        <div className="space-y-2 bg-muted/50 rounded-lg px-3 py-2.5">
+          <div className="flex items-center gap-3 text-xs">
+            <span className="flex items-center gap-1.5 text-foreground font-medium">
+              <Navigation className="h-3.5 w-3.5 text-blue-500" />
+              {tripRoute.distanceMiles.toFixed(0)} mi
+            </span>
+            <span className="flex items-center gap-1.5 text-muted-foreground">
+              <Clock className="h-3.5 w-3.5" />
+              {formatDuration(tripRoute.durationMinutes)}
+            </span>
+            <span className="flex items-center gap-1.5 text-muted-foreground">
+              <Battery className="h-3.5 w-3.5" />
+              Range: <strong className="text-green-600">{rangeMiles} mi</strong>
+            </span>
+          </div>
+
+          {chargeStops.length > 0 ? (
+            <div className="space-y-1.5">
+              <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                <Zap className="h-3 w-3 text-orange-500" />
+                Recommended Stops ({chargeStops.length})
+              </div>
+              {chargeStops.map((stop, i) => (
+                <div key={stop.charger.id} className="flex items-center gap-2 text-xs bg-white dark:bg-card rounded-md px-2.5 py-1.5 shadow-sm">
+                  <div className="flex items-center justify-center w-5 h-5 rounded-full bg-orange-100 text-orange-600 text-[10px] font-bold shrink-0">
+                    {i + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium truncate">{stop.charger.name}</div>
+                    <div className="text-muted-foreground text-[11px]">
+                      {stop.distanceFromStart.toFixed(0)} mi from start
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className={`text-[11px] font-medium ${stop.estimatedBatteryOnArrival < 20 ? 'text-red-500' : 'text-green-600'}`}>
+                      {stop.estimatedBatteryOnArrival.toFixed(0)}% arr.
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : tripRoute.distanceMiles <= rangeMiles * 0.85 ? (
+            <div className="flex items-center gap-1.5 text-xs text-green-600">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              No charging stops needed!
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 text-xs text-orange-600">
+              <BatteryWarning className="h-3.5 w-3.5" />
+              ~{Math.ceil(tripRoute.distanceMiles / (rangeMiles * 0.85))} charge stop(s) needed
+            </div>
           )}
         </div>
       )}
@@ -209,11 +389,15 @@ export default function TripPlanner() {
         <Button
           size="sm"
           className="flex-1 h-8 text-xs gap-1.5"
-          disabled={!canSearch}
-          onClick={handleFindChargers}
+          disabled={!canSearch || tripRouteLoading}
+          onClick={handlePlanTrip}
         >
-          <Zap className="h-3.5 w-3.5" />
-          Find Chargers Along Route
+          {tripRouteLoading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Zap className="h-3.5 w-3.5" />
+          )}
+          {tripRouteLoading ? 'Planning...' : 'Plan Trip'}
         </Button>
         {(tripOrigin || tripDestination) && (
           <Button

@@ -10,12 +10,10 @@ import {
   poiTypeEmoji,
 } from '@/lib/ev-helpers';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import {
-  Zap, MapPin, Clock, Building2, ChevronRight, ExternalLink,
+  Zap, MapPin, Clock, Building2, ExternalLink,
   Navigation, Phone, Globe, Utensils, Dog, TreePine,
 } from 'lucide-react';
 
@@ -120,8 +118,6 @@ function ChargerCard({ charger }: { charger: Charger }) {
 }
 
 function POICard({ poi }: { poi: ReturnType<typeof useEVStore.getState>['pois'][0] }) {
-  const { lat, lng } = useEVStore(s => s.mapCenter);
-  // Note: Using the store's lat/lng is wrong, we need the POI's own lat/lng for navigation
   const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${poi.lat},${poi.lng}`;
 
   return (
