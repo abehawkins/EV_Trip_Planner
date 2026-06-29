@@ -42,11 +42,13 @@ export default function Home() {
 
   useEffect(() => {
     if (!mounted) return;
+    // Skip auto-fetch when trip mode is active — trip planner manages its own charger search
+    if (store.tripMode) return;
     if (store.mapZoom >= 8 && !store.chargersLoading && fetchedZoomRef.current !== store.mapZoom) {
       fetchedZoomRef.current = store.mapZoom;
       fetchChargersAndPOIs();
     }
-  }, [store.mapZoom, store.chargersLoading, mounted]);
+  }, [store.mapZoom, store.chargersLoading, store.tripMode, mounted]);
 
   const dcFast = chargers.filter((c) =>
     c.connections.some((conn) => conn.level === 3)
