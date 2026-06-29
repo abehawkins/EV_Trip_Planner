@@ -381,7 +381,7 @@ export default function TripPlanner() {
           ) : (
             <div className="flex items-center gap-1.5 text-xs text-orange-600">
               <BatteryWarning className="h-3.5 w-3.5" />
-              ~{Math.ceil(tripRoute.distanceMiles / (rangeMiles * 0.85))} charge stop(s) needed
+              ~{Math.max(1, Math.ceil(tripRoute.distanceMiles / (rangeMiles * 0.85)) - 1)} charge stop(s) needed
             </div>
           )}
         </div>
