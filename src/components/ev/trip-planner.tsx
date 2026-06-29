@@ -214,39 +214,41 @@ export default function TripPlanner() {
 
       setChargersLoading(true);
       setChargers([]);
-      const samplePoints = samplePointsAlongRoute(route.geometry, Math.max(rangeMiles * 0.6, 30));
+
+      // Use wider intervals and larger search radius to minimize API calls
+      // (DEMO_KEY: 30 req/hr). Sample every ~80 miles with 75mi radius for overlap.
+      const sampleInterval = Math.max(rangeMiles * 0.8, 80);
+      const searchRadius = Math.min(Math.max(rangeMiles, 75), 100);
+      const samplePoints = samplePointsAlongRoute(route.geometry, sampleInterval);
       const allPoints = [
         { lat: tripOrigin.lat, lng: tripOrigin.lng },
         ...samplePoints,
         { lat: tripDestination.lat, lng: tripDestination.lng },
       ];
 
-      const fetches = allPoints.map(async (pt) => {
+      // Fetch sequentially to avoid exhausting rate limits
+      const seen = new Set<number>();
+      const unique: Charger[] = [];
+      for (const pt of allPoints) {
         const p = new URLSearchParams({
           lat: pt.lat.toString(),
           lng: pt.lng.toString(),
-          distance: Math.min(rangeMiles, 50).toString(),
-          maxresults: '50',
+          distance: searchRadius.toString(),
+          maxresults: '100',
         });
         if (chargerType !== 'all') p.set('chargerType', chargerType);
         try {
           const r = await fetch(`/api/chargers?${p}`);
           const d = await r.json();
-          return (d.chargers || []) as Charger[];
-        } catch {
-          return [];
-        }
-      });
-
-      const allChargers = await Promise.all(fetches);
-      const seen = new Set<number>();
-      const unique: Charger[] = [];
-      for (const batch of allChargers) {
-        for (const c of batch) {
-          if (!seen.has(c.id)) {
-            seen.add(c.id);
-            unique.push(c);
+          const batch = (d.chargers || []) as Charger[];
+          for (const c of batch) {
+            if (!seen.has(c.id)) {
+              seen.add(c.id);
+              unique.push(c);
+            }
           }
+        } catch {
+          // continue with next point
         }
       }
       setChargers(unique);
